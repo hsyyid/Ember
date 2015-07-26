@@ -46,33 +46,11 @@ public class Ember {
      * @throws Exception if the minigame was unable to override the currently running minigame.
      */
     public static boolean register(Arena arena, Minigame minigame) throws Exception {
-        // If the minigame is already registered, return false.
         if (Ember.getArena(minigame).isPresent()) return false;
 
         // If the arena is already registered then..
-        if (!Ember.getArena(arena.getUniqueId()).isPresent()) {
-            // Get the currently occupying Task.
-            Task task = Ember.arenas.get(arena);
-
-            // If the task exists...
-            if (task != null) {
-                // Call an event so that the plugins know a minigame is being stopped.
-                MinigameStoppingEvent stoppingEvent = new MinigameStoppingEvent((Minigame) task.getRunnable());
-                Ember.instance.game.getEventManager().post(stoppingEvent);
-
-                if (stoppingEvent.isCancelled())
-                    throw new Exception("Unable to override the currently running minigame.");
-
-                // If the event isn't cancelled, we continue cancelling the currently
-                // running minigame.
-                task.cancel();
-
-                // Call an event so that the plugins know a minigame has stopped.
-                Ember.instance.game.getEventManager().post(new MinigameStoppedEvent((Minigame) task.getRunnable()));
-
-                // Unregister the object from the EventManager.
-                Ember.instance.game.getEventManager().unregister(task.getRunnable());
-            }
+        if (Ember.getArena(arena.getUniqueId()).isPresent()) {
+            Ember.unregister(arena);
         }
 
         // If the minigame isn't null, then...
@@ -104,14 +82,35 @@ public class Ember {
      *
      * @param arena The arena object.
      * @return true if the arena was removed successfully.
+     * @throws Exception if the minigame was unable to override the currently running minigame.
      */
-    public static boolean unregister(Arena arena) {
-        for (Iterator<Arena> iter = Ember.arenas.keySet().iterator(); iter.hasNext();) {
-            Arena a = iter.next();
-            if (a.equals(arena)) {
-                Ember.arenas.remove(a);
-                return true;
-            }
+    public static boolean unregister(Arena arena) throws Exception {
+        // Get the currently occupying Task.
+        Task task = Ember.arenas.get(arena);
+
+        // If the task exists...
+        if (task != null) {
+            // Call an event so that the plugins know a minigame is being stopped.
+            MinigameStoppingEvent stoppingEvent = new MinigameStoppingEvent((Minigame) task.getRunnable());
+            Ember.instance.game.getEventManager().post(stoppingEvent);
+
+            if (stoppingEvent.isCancelled())
+                throw new Exception("Unable to override the currently running minigame.");
+
+            // If the event isn't cancelled, we continue cancelling the currently
+            // running minigame.
+            task.cancel();
+
+            // Call an event so that the plugins know a minigame has stopped.
+            Ember.instance.game.getEventManager().post(new MinigameStoppedEvent((Minigame) task.getRunnable()));
+
+            // Unregister the object from the EventManager.
+            Ember.instance.game.getEventManager().unregister(task.getRunnable());
+
+            // Remove the arena
+            Ember.arenas.remove(arena);
+
+            return true;
         }
         return false;
     }
