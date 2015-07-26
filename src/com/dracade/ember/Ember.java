@@ -25,7 +25,7 @@ public class Ember {
     // Singleton
     private static Ember instance;
 
-    // A list to store the arenas.
+    // A map to store arenas and their games.
     private static HashMap<Arena, Task> arenas;
 
     /**
