@@ -9,11 +9,11 @@ public abstract class Arena implements Identifiable {
 
     // Arena properties.
     private String name;
+    private UUID uniqueId;
     private Location spawn;
 
     // Serialization purposes only.
     private Class<?> type;
-    private UUID uniqueId;
 
     /**
      * Creates a new Arena instance.
