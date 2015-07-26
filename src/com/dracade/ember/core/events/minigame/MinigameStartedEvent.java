@@ -1,5 +1,7 @@
 package com.dracade.ember.core.events.minigame;
 
+import com.dracade.ember.Ember;
+import com.dracade.ember.core.Arena;
 import com.dracade.ember.core.Minigame;
 import com.dracade.ember.core.events.MinigameEvent;
 
