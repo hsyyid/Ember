@@ -38,24 +38,94 @@ public class Ember {
     }
 
     /**
-     * Add an arena.
+     * Set the minigame to be played on an arena.
      *
-     * @param arena the arena object.
+     * @param arena the arena for the game to be played on.
+     * @param minigame the game to be played.
+     * @return true if the minigame was set successfully.
+     * @throws Exception if the minigame was unable to override the currently running minigame.
      */
-    public static void addArena(Arena arena) {
-        if (Ember.getArena(arena.getUniqueId()).isPresent()) return;
-        Ember.arenas.put(arena, null);
+    public static boolean register(Arena arena, Minigame minigame) throws Exception {
+        // If the minigame is already registered, return false.
+        if (Ember.getArena(minigame).isPresent()) return false;
+
+        // If the arena is already registered then..
+        if (!Ember.getArena(arena.getUniqueId()).isPresent()) {
+            // Get the currently occupying Task.
+            Task task = Ember.arenas.get(arena);
+
+            // If the task exists...
+            if (task != null) {
+                // Call an event so that the plugins know a minigame is being stopped.
+                MinigameStoppingEvent stoppingEvent = new MinigameStoppingEvent((Minigame) task.getRunnable());
+                Ember.instance.game.getEventManager().post(stoppingEvent);
+
+                if (stoppingEvent.isCancelled())
+                    throw new Exception("Unable to override the currently running minigame.");
+
+                // If the event isn't cancelled, we continue cancelling the currently
+                // running minigame.
+                task.cancel();
+
+                // Call an event so that the plugins know a minigame has stopped.
+                Ember.instance.game.getEventManager().post(new MinigameStoppedEvent((Minigame) task.getRunnable()));
+
+                // Unregister the object from the EventManager.
+                Ember.instance.game.getEventManager().unregister(task.getRunnable());
+            }
+        }
+
+        // If the minigame isn't null, then...
+        if (minigame != null) {
+            // We then register our new minigame to the EventHandler.
+            Ember.instance.game.getEventManager().register(Ember.instance, minigame);
+
+            // Call an event so that the plugins know a minigame has started.
+            Ember.instance.game.getEventManager().post(new MinigameStartedEvent(minigame));
+
+            // We then create a new Task.
+            Task task = Ember.instance.game.getScheduler().getTaskBuilder()
+                    .name(arena.getName())
+                    .delay(minigame.getDelay())
+                    .interval(minigame.getInterval())
+                    .execute(minigame)
+                    .submit(Ember.instance);
+
+            // We then register the task to be executed on the specified arena.
+            Ember.arenas.put(arena, task);
+        }
+
+        // We return true to acknowlegde the task has been registered successfully.
+        return true;
     }
+
+    /**
+     * Unregister an arena.
+     *
+     * @param arena The arena object.
+     * @return true if the arena was removed successfully.
+     */
+    public static boolean unregister(Arena arena) {
+        for (Iterator<Arena> iter = Ember.arenas.keySet().iterator(); iter.hasNext();) {
+            Arena a = iter.next();
+            if (a.equals(arena)) {
+                Ember.arenas.remove(a);
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Get an arena by it's identifier.
      *
-     * @param uniqueId the arena's unique identifer.
+     * @param id the arena's unique identifer.
      * @return the arena wrapped in an Optional.
      */
-    public static Optional<Arena> getArena(UUID uniqueId) {
+    public static Optional<Arena> getArena(UUID id) {
         for (Arena a : Ember.arenas.keySet()) {
-            if (a.getUniqueId().equals(uniqueId)) return Optional.of(a);
+            if (a.getUniqueId().equals(id)) return Optional.of(a);
         }
         return Optional.absent();
     }
@@ -74,30 +144,13 @@ public class Ember {
     }
 
     /**
-     * Remove an arena.
+     * Get the minigame of a specific arena.
      *
-     * @param arena The arena object.
-     * @return true if the arena was removed successfully.
+     * @param arena the arena you wish to get the minigame.
+     * @return the minigame wrapped in an Optional.
      */
-    public static boolean removeArena(Arena arena) {
-        return Ember.removeArena(arena.getUniqueId());
-    }
-
-    /**
-     * Remove an arena.
-     *
-     * @param uniqueId the unique identifer of the arena.
-     * @return true if the arena was removed successfully.
-     */
-    public static boolean removeArena(UUID uniqueId) {
-        for (Iterator<Arena> iter = Ember.arenas.keySet().iterator(); iter.hasNext();) {
-            Arena a = iter.next();
-            if (a.getUniqueId().equals(uniqueId)) {
-                Ember.arenas.remove(a);
-                return true;
-            }
-        }
-        return false;
+    public static Optional<Minigame> getMinigame(Arena arena) {
+        return (Ember.arenas.get(arena) != null) ? Optional.of((Minigame) Ember.arenas.get(arena).getRunnable()) : Optional.<Minigame>absent();
     }
 
     /**
@@ -107,77 +160,6 @@ public class Ember {
      */
     public ImmutableList<Arena> getArenas() {
         return ImmutableList.copyOf(Ember.arenas.keySet());
-    }
-
-    /**
-     * Set the minigame to be played on an arena.
-     *
-     * @param arena the arena for the game to be played on.
-     * @param minigame the game to be played.
-     * @return true if the minigame was set successfully.
-     * @throws Exception if the minigame was unable to override the currently running minigame.
-     */
-    public static boolean setMinigame(Arena arena, Minigame minigame) throws Exception {
-        // If the arena specified isn't registered, return false.
-        if (!Ember.getArena(arena.getUniqueId()).isPresent()) return false;
-
-        // If the minigame is already registered, return false.
-        if (Ember.getArena(minigame).isPresent()) return false;
-
-        // Get the currently occupying Task.
-        Task task = Ember.arenas.get(arena);
-
-        // If the task exists...
-        if (task != null) {
-            // Call an event so that the plugins know a minigame is being stopped.
-            MinigameStoppingEvent stoppingEvent = new MinigameStoppingEvent((Minigame) task.getRunnable());
-            Ember.instance.game.getEventManager().post(stoppingEvent);
-
-            if (stoppingEvent.isCancelled()) throw new Exception("Unable to override the currently running minigame.");
-
-            // If the event isn't cancelled, we continue cancelling the currently
-            // running minigame.
-            task.cancel();
-
-            // Call an event so that the plugins know a minigame has stopped.
-            Ember.instance.game.getEventManager().post(new MinigameStoppedEvent((Minigame) task.getRunnable()));
-
-            // Unregister the object from the EventManager.
-            Ember.instance.game.getEventManager().unregister(task.getRunnable());
-        }
-
-        // If the minigame isn't null, then...
-        if (minigame != null) {
-            // We then register our new minigame to the EventHandler.
-            Ember.instance.game.getEventManager().register(Ember.instance, minigame);
-
-            // Call an event so that the plugins know a minigame has started.
-            Ember.instance.game.getEventManager().post(new MinigameStartedEvent(minigame));
-
-            // We then create a new Task.
-            task = Ember.instance.game.getScheduler().getTaskBuilder()
-                    .name(arena.getName())
-                    .delay(minigame.getDelay())
-                    .interval(minigame.getInterval())
-                    .execute(minigame)
-                    .submit(Ember.instance);
-
-            // We then register the task to be executed on the specified arena.
-            Ember.arenas.put(arena, task);
-        }
-
-        // We return true to acknowlegde the task has been registered successfully.
-        return true;
-    }
-
-    /**
-     * Get the minigame of a specific arena.
-     *
-     * @param arena the arena you wish to get the minigame.
-     * @return the minigame wrapped in an Optional.
-     */
-    public static Optional<Minigame> getMinigame(Arena arena) {
-        return (Ember.arenas.get(arena) != null) ? Optional.of((Minigame) Ember.arenas.get(arena).getRunnable()) : Optional.<Minigame>absent();
     }
 
     /**
