@@ -142,10 +142,9 @@ public class Ember {
         // If the task exists...
         if (task != null) {
             // Call an event so that the plugins know a minigame is being stopped.
-            MinigameStoppingEvent stoppingEvent = new MinigameStoppingEvent((Minigame) task.getRunnable());
-            Ember.instance.game.getEventManager().post(stoppingEvent);
+            boolean cancelled = Ember.instance.game.getEventManager().post(new MinigameStoppingEvent((Minigame) task.getRunnable()));
 
-            if (stoppingEvent.isCancelled())
+            if (cancelled)
                 throw new Exception("Unable to override the currently running minigame.");
 
             // If the event isn't cancelled, we continue cancelling the currently
