@@ -55,6 +55,7 @@ public class ClassAdapter extends TypeAdapter<Class> {
         }
         in.beginObject();
             in.nextName();
+            in.nextString();
             in.nextName();
 
         Class c = null;
@@ -63,6 +64,8 @@ public class ClassAdapter extends TypeAdapter<Class> {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        in.endObject();
 
         return c;
     }

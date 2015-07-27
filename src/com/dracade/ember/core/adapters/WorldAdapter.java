@@ -61,9 +61,12 @@ public class WorldAdapter extends TypeAdapter<World> {
 
         in.beginObject();
             in.nextName();
+            in.nextString();
             in.nextName();
 
         Optional<World> optional = Ember.game().getServer().getWorld(UUID.fromString(in.nextString()));
+
+        in.endObject();
 
         return optional.isPresent()? optional.get() : null;
     }
