@@ -9,9 +9,7 @@ import com.dracade.ember.core.events.minigame.MinigameStoppedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppingEvent;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
+import com.google.gson.*;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
@@ -275,6 +273,47 @@ public class Ember {
                 b.registerTypeHierarchyAdapter(entry.getKey(), entry.getValue().newInstance());
             }
             return b.create();
+        }
+
+        /**
+         * Get the object type from the JSON.
+         *
+         * @param json the json data.
+         * @return the relevant class.
+         * @throws ClassNotFoundException if the class wasn't found.
+         */
+        public Class getType(String json) throws ClassNotFoundException {
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(json);
+            if (element.isJsonObject()) {
+                JsonObject obj = element.getAsJsonObject();
+                if (obj.has("type")) {
+                    element = obj.get("type");
+                    if (element.isJsonObject()) {
+                        obj = element.getAsJsonObject();
+                        if (obj.has("class")) {
+                            JsonPrimitive value = obj.get("class").getAsJsonPrimitive();
+                            if (value.isString()) {
+                                return Class.forName(value.getAsString());
+                            }
+                        }
+                    }
+                }
+            }
+            throw new ClassNotFoundException("The JSON data provided doesn't contain a valid \"type\" object.");
+        }
+
+        /**
+         * Attempts to get and load the correct object from the JSON data.
+         *
+         * @param json the json data.
+         * @return The object.
+         * @throws ClassNotFoundException if the object type wasn't found.
+         * @throws IllegalAccessException if a registered adapter is not accessible.
+         * @throws InstantiationException if a registered adapter cannot be instantiated.
+         */
+        public Object getAndLoad(String json) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+            return this.gson().fromJson(json, this.getType(json));
         }
 
     }
