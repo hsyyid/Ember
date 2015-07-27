@@ -13,7 +13,7 @@ public abstract class Arena implements Identifiable {
     private Location spawn;
 
     // Serialization purposes only.
-    private Class<?> type;
+    private Class type;
 
     /**
      * Creates a new Arena instance.
@@ -23,9 +23,10 @@ public abstract class Arena implements Identifiable {
      */
     protected Arena(String name, Location spawn) {
         this.name = name;
-        this.spawn = spawn;
-        this.type = this.getClass();
         this.uniqueId = UUID.randomUUID();
+        this.spawn = spawn;
+
+        this.type = this.getClass();
     }
 
     /**

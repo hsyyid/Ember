@@ -1,10 +1,5 @@
 package com.dracade.ember.core;
 
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.scheduler.Task;
-
-import java.util.UUID;
-
 public interface Minigame extends Runnable {
 
     /**
@@ -14,7 +9,7 @@ public interface Minigame extends Runnable {
      * @return The delay (offset) in either milliseconds or ticks (ticks are
      *         exclusive to synchronous tasks)
      */
-    long getDelay();
+    long delay();
 
     /**
      * Gets the interval for repeating tasks. An interval of 0 represents that
@@ -23,6 +18,15 @@ public interface Minigame extends Runnable {
      * @return The interval (period) in either milliseconds or ticks (ticks are
      *         exclusive to synchronous tasks)
      */
-    long getInterval();
+    long interval();
+
+    /**
+     * Whether or not this object is registered to the event bus.
+     * This should be set to FALSE if the class specified is the
+     * plugin class annotated with {@code @Plugin}.
+     *
+     * @return True if you wish to register events.
+     */
+    boolean events();
 
 }

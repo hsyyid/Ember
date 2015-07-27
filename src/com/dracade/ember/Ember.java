@@ -2,11 +2,15 @@ package com.dracade.ember;
 
 import com.dracade.ember.core.Arena;
 import com.dracade.ember.core.Minigame;
+import com.dracade.ember.core.adapters.ClassAdapter;
 import com.dracade.ember.core.events.minigame.MinigameStartedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppingEvent;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
 import com.google.inject.Inject;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Subscribe;
@@ -24,6 +28,7 @@ public class Ember {
 
     // Singleton
     private static Ember instance;
+    private static Serializer serializer = new Serializer();
 
     // A map to store arenas and their games.
     private static HashMap<Arena, Task> arenas;
@@ -34,7 +39,17 @@ public class Ember {
     @Subscribe
     private void onInitialization(InitializationEvent event) {
         Ember.instance = this;
+        Ember.serializer = new Serializer();
         Ember.arenas = new HashMap<Arena, Task>();
+    }
+
+    /**
+     * Get the Serializer.
+     *
+     * @return Ember's serialization manager.
+     */
+    public static Serializer serializer() {
+        return Ember.serializer;
     }
 
     /**
@@ -56,7 +71,9 @@ public class Ember {
         // If the minigame isn't null, then...
         if (minigame != null) {
             // We then register our new minigame to the EventHandler.
-            Ember.instance.game.getEventManager().register(Ember.instance, minigame);
+            if (minigame.events()) {
+                Ember.instance.game.getEventManager().register(Ember.instance, minigame);
+            }
 
             // Call an event so that the plugins know a minigame has started.
             Ember.instance.game.getEventManager().post(new MinigameStartedEvent(minigame));
@@ -64,8 +81,8 @@ public class Ember {
             // We then create a new Task.
             Task task = Ember.instance.game.getScheduler().getTaskBuilder()
                     .name(arena.getName())
-                    .delay(minigame.getDelay())
-                    .interval(minigame.getInterval())
+                    .delay(minigame.delay())
+                    .interval(minigame.interval())
                     .execute(minigame)
                     .submit(Ember.instance);
 
@@ -172,6 +189,81 @@ public class Ember {
             games.add((Minigame) t.getRunnable());
         }
         return ImmutableList.copyOf(games);
+    }
+
+    /**
+     * A class to handle object serialization.
+     */
+    public static final class Serializer {
+
+        // A set to store all of our type adapters.
+        private HashMap<Class<?>, Class<? extends TypeAdapter>> adapters;
+
+        /**
+         * Serializer constructor.
+         */
+        protected Serializer() {
+            this.adapters = new HashMap<Class<?>, Class<? extends TypeAdapter>>();
+            this.register(Class.class, ClassAdapter.class);
+        }
+
+        /**
+         * Register a TypeAdapter.
+         *
+         * @param object the object to adapt toward.
+         * @param adapter the adapters class.
+         * @param <T>
+         * @return true if the adapters was registered successfully.
+         */
+        public <T extends TypeAdapter> boolean register(Class<?> object, Class<T> adapter) {
+            if (!this.adapters.containsKey(object)) {
+                this.adapters.put(object, adapter);
+            }
+            return this.adapters.containsKey(object);
+        }
+
+        /**
+         * Unregister a TypeAdapter.
+         *
+         * @param <T>
+         * @return true if the adapters was unregistered successfully.
+         */
+        public <T extends TypeAdapter> boolean unregister(Class<?> object) {
+            if (!this.adapters.containsKey(object)) {
+                this.adapters.remove(object);
+            }
+            return this.adapters.containsKey(object);
+        }
+
+        /**
+         * Get the GsonBuilder.
+         *
+         * @return GsonBuilder instance.
+         * @throws IllegalAccessException if a registered adapter is not accessible.
+         * @throws InstantiationException if a registered adapter cannot be instantiated.
+         */
+        public Gson gson() throws InstantiationException, IllegalAccessException {
+            return this.gson(null);
+        }
+
+        /**
+         * Get the GsonBuilder.
+         *
+         * @param builder your custom GsonBuilder instance.
+         * @return GsonBuilder instance.
+         * @throws IllegalAccessException if a registered adapter is not accessible.
+         * @throws InstantiationException if a registered adapter cannot be instantiated.
+         */
+        public Gson gson(GsonBuilder builder) throws IllegalAccessException, InstantiationException {
+            GsonBuilder b = (builder != null) ? builder : new GsonBuilder();
+
+            for (Map.Entry<Class<?>, Class<? extends TypeAdapter>> entry : this.adapters.entrySet()) {
+                b.registerTypeAdapter(entry.getKey(), entry.getValue().newInstance());
+            }
+
+            return b.create();
+        }
+
     }
 
 }
