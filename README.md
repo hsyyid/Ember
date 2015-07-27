@@ -10,7 +10,7 @@ A multiplayer minigame framework built using the Sponge Minecraft server platfor
 > Ember currently allows the developer to create custom arenas and minigames with ease.
 > This includes the ability to serialize and deserialize objects simply and effectively.
 
-> Please read the documentation on using Ember for more information.
+> Please read the [documentation](https://github.com/Dracade/Ember/wiki) on using Ember for more information.
 
 
 
