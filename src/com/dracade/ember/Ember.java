@@ -3,6 +3,7 @@ package com.dracade.ember;
 import com.dracade.ember.core.Arena;
 import com.dracade.ember.core.Minigame;
 import com.dracade.ember.core.adapters.ClassAdapter;
+import com.dracade.ember.core.adapters.WorldAdapter;
 import com.dracade.ember.core.events.minigame.MinigameStartedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppingEvent;
@@ -12,11 +13,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.state.InitializationEvent;
+import org.spongepowered.api.event.state.ServerStartedEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.scheduler.Task;
+import org.spongepowered.api.world.World;
 
 import java.util.*;
 
@@ -25,6 +30,8 @@ public class Ember {
 
     // Injects;
     @Inject Game game;
+
+    @Inject Logger logger;
 
     // Singleton
     private static Ember instance;
@@ -38,9 +45,23 @@ public class Ember {
      */
     @Subscribe
     private void onInitialization(InitializationEvent event) {
+        logger.info("Is now running ...");
         Ember.instance = this;
         Ember.serializer = new Serializer();
         Ember.arenas = new HashMap<Arena, Task>();
+    }
+
+    @Subscribe
+    private void onServerStarted(ServerStartedEvent event) {
+        logger.info("Server started!");
+        TestArena testArena = new TestArena(this.game.getServer().getWorld("world").get());
+        try {
+            logger.info(Ember.serializer().gson().toJson(testArena));
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -203,7 +224,9 @@ public class Ember {
          */
         protected Serializer() {
             this.adapters = new HashMap<Class<?>, Class<? extends TypeAdapter>>();
+
             this.register(Class.class, ClassAdapter.class);
+            this.register(World.class, WorldAdapter.class);
         }
 
         /**

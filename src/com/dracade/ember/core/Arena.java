@@ -10,7 +10,7 @@ public abstract class Arena implements Identifiable {
     // Arena properties.
     private String name;
     private UUID uniqueId;
-    private Location spawn;
+    private Spawnpoint spawn;
 
     // Serialization purposes only.
     private Class type;
@@ -21,7 +21,7 @@ public abstract class Arena implements Identifiable {
      * @param name the name of the arena.
      * @param spawn the spawn location of the arena.
      */
-    protected Arena(String name, Location spawn) {
+    protected Arena(String name, Spawnpoint spawn) {
         this.name = name;
         this.uniqueId = UUID.randomUUID();
         this.spawn = spawn;
@@ -41,14 +41,14 @@ public abstract class Arena implements Identifiable {
      *
      * @param spawn location to be used as the spawn point.
      */
-    public final void setSpawn(Location spawn) {
+    public final void setSpawn(Spawnpoint spawn) {
         this.spawn = spawn;
     }
 
     /**
      * @return the spawn location of the arena.
      */
-    public final Location getSpawn() {
+    public final Spawnpoint getSpawn() {
         return this.spawn;
     }
 

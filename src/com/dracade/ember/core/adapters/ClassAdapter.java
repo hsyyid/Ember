@@ -31,8 +31,8 @@ public class ClassAdapter extends TypeAdapter<Class> {
             return null;
         }
         in.beginObject();
-        in.nextName();
-        in.nextName();
+            in.nextName();
+            in.nextName();
 
         Class c = null;
         try {
