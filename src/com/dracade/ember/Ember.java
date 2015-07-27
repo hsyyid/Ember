@@ -15,7 +15,6 @@ import com.google.gson.TypeAdapter;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.state.InitializationEvent;
 import org.spongepowered.api.event.state.ServerStartedEvent;
@@ -31,8 +30,6 @@ public class Ember {
     // Injects;
     @Inject Game game;
 
-    @Inject Logger logger;
-
     // Singleton
     private static Ember instance;
     private static Serializer serializer = new Serializer();
@@ -45,23 +42,18 @@ public class Ember {
      */
     @Subscribe
     private void onInitialization(InitializationEvent event) {
-        logger.info("Is now running ...");
         Ember.instance = this;
         Ember.serializer = new Serializer();
         Ember.arenas = new HashMap<Arena, Task>();
     }
 
-    @Subscribe
-    private void onServerStarted(ServerStartedEvent event) {
-        logger.info("Server started!");
-        TestArena testArena = new TestArena(this.game.getServer().getWorld("world").get());
-        try {
-            logger.info(Ember.serializer().gson().toJson(testArena));
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+    /**
+     * Get the Game.
+     *
+     * @return Sponge's game instance.
+     */
+    public static Game game() {
+        return Ember.instance.game;
     }
 
     /**
@@ -194,7 +186,7 @@ public class Ember {
      *
      * @return An ImmutableList of Arena objects.
      */
-    public ImmutableList<Arena> getArenas() {
+    public static ImmutableList<Arena> getArenas() {
         return ImmutableList.copyOf(Ember.arenas.keySet());
     }
 
@@ -203,7 +195,7 @@ public class Ember {
      *
      * @return An ImmutableList of Minigame objects.
      */
-    public ImmutableList<Minigame> getMinigames() {
+    public static ImmutableList<Minigame> getMinigames() {
         List<Minigame> games = new ArrayList<Minigame>();
         for (Task t : Ember.arenas.values()) {
             games.add((Minigame) t.getRunnable());
@@ -280,7 +272,7 @@ public class Ember {
             GsonBuilder b = (builder != null) ? builder : new GsonBuilder();
 
             for (Map.Entry<Class<?>, Class<? extends TypeAdapter>> entry : this.adapters.entrySet()) {
-                b.registerTypeAdapter(entry.getKey(), entry.getValue().newInstance());
+                b.registerTypeHierarchyAdapter(entry.getKey(), entry.getValue().newInstance());
             }
             return b.create();
         }

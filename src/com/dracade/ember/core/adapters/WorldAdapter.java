@@ -16,8 +16,6 @@ import java.util.UUID;
 
 public class WorldAdapter extends TypeAdapter<World> {
 
-    @Inject private Game game;
-
     @Override
     public void write(JsonWriter out, World value) throws IOException {
         if (value == null) {
@@ -45,7 +43,7 @@ public class WorldAdapter extends TypeAdapter<World> {
             in.nextName();
             in.nextName();
 
-        Optional<World> optional = this.game.getServer().getWorld(UUID.fromString(in.nextString()));
+        Optional<World> optional = Ember.game().getServer().getWorld(UUID.fromString(in.nextString()));
 
         return optional.isPresent()? optional.get() : null;
     }
