@@ -132,7 +132,6 @@ public class Ember {
         return false;
     }
 
-
     /**
      * Get an arena by it's identifier.
      *
@@ -260,7 +259,6 @@ public class Ember {
             for (Map.Entry<Class<?>, Class<? extends TypeAdapter>> entry : this.adapters.entrySet()) {
                 b.registerTypeAdapter(entry.getKey(), entry.getValue().newInstance());
             }
-
             return b.create();
         }
 
