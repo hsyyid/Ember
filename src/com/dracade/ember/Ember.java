@@ -225,12 +225,13 @@ public class Ember {
         Collection<Arena> arenas = new ArrayList<Arena>();
 
         //Loop through all the arenas.
-        for(Arena a : Ember.arenas.keySet()){
+        for (Arena a : Ember.arenas.keySet()) {
 
             //If the arena's world equals the passed world.
-            if(a.getSpawn().getWorld().equals(world))
+            if (a.getSpawn().getWorld().equals(world)) {
                 //add it to the collection.
                 arenas.add(a);
+            }
         }
         return ImmutableList.copyOf(arenas);
     }
@@ -255,22 +256,19 @@ public class Ember {
      * @return An ImmutableList containing the minigames for that world.
      */
     public static ImmutableList<Minigame> getMinigames(World world){
-
         //A collection to store the minigames temporarily.
         Collection<Minigame> minigames = new ArrayList<Minigame>();
 
         //Loop through the active minigames.
-        for( Arena a : Ember.getArenas() ) {
-
-                //then check if the arena is being played on the passed world.
-                if(a.getSpawn().getWorld().equals(world)) {
-                    //Get the minigame for the arena
-                    Optional<Minigame> minigame = Ember.getMinigame(a);
-                    //If the minigame is present
-                    if(minigame.isPresent())
-                        //If so then return the minigame.
-                        minigames.add(minigame.get());
-                }
+        for (Arena a : Ember.getArenas(world)) {
+            //Get the minigame for the arena
+            Optional<Minigame> minigame = Ember.getMinigame(a);
+                
+            //If the minigame is present
+            if(minigame.isPresent()) {
+                //If so then return the minigame.
+                minigames.add(minigame.get());
+            }
 
         }
         return ImmutableList.copyOf(minigames);
