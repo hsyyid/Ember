@@ -34,11 +34,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.*;
 import com.google.inject.Inject;
-import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.state.InitializationEvent;
-import org.spongepowered.api.event.state.ServerStartedEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.world.World;
@@ -336,7 +334,7 @@ public class Ember {
          * @throws InstantiationException if a registered adapter cannot be instantiated.
          */
         public Object getAndLoad(String json) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-            return this.gson().fromJson(json, this.getType(json));
+            return this.getType(json).cast(this.gson().fromJson(json, this.getType(json)));
         }
 
     }

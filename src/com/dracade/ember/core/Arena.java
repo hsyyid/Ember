@@ -38,12 +38,12 @@ public abstract class Arena implements Identifiable {
     private Class type;
 
     /**
-     * Creates a new Arena instance.
+     * Constructs a new Arena instance.
      *
      * @param name the name of the arena.
      * @param spawn the spawn location of the arena.
      */
-    protected Arena(String name, Spawnpoint spawn) {
+    public Arena(String name, Spawnpoint spawn) {
         this.name = name;
         this.uniqueId = UUID.randomUUID();
         this.spawn = spawn;
