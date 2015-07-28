@@ -203,6 +203,7 @@ public class Ember {
     public static Optional<Minigame> getMinigame(Arena arena) {
         return (Ember.arenas.get(arena) != null) ? Optional.of((Minigame) Ember.arenas.get(arena).getRunnable()) : Optional.<Minigame>absent();
     }
+
     /**
      * Get all of the currently registered arenas.
      *
@@ -214,6 +215,7 @@ public class Ember {
 
     /**
      * Gets the Arena from the passed world.
+     *
      * @param world The world a Arena is on.
      * @return Arena in that world.
      */
@@ -248,6 +250,7 @@ public class Ember {
 
     /**
      * Gets the minigames that are being played on the provided world.
+     *
      * @param world The world that one or more minigames are being played on.
      * @return An ImmutableList containing the minigames for that world.
      */
@@ -257,16 +260,17 @@ public class Ember {
         Collection<Minigame> minigames = new ArrayList<Minigame>();
 
         //Loop through the active minigames.
-        for( Minigame minigame : getMinigames() ) {
+        for( Arena a : Ember.getArenas() ) {
 
-            //Get the arena the minigame is being played on.
-            Optional<Arena> arenaOptional = Ember.getArena(minigame);
-            //If the arena is present
-            if(arenaOptional.isPresent())
                 //then check if the arena is being played on the passed world.
-                if(arenaOptional.get().getSpawn().getWorld().equals(world))
-                    //If so then return the minigame.
-                    minigames.add(minigame);
+                if(a.getSpawn().getWorld().equals(world)) {
+                    //Get the minigame for the arena
+                    Optional<Minigame> minigame = Ember.getMinigame(a);
+                    //If the minigame is present
+                    if(minigame.isPresent())
+                        //If so then return the minigame.
+                        minigames.add(minigame.get());
+                }
 
         }
         return ImmutableList.copyOf(minigames);
