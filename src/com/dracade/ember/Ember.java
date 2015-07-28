@@ -36,7 +36,10 @@ import com.google.gson.*;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.entity.player.Player;
 import org.spongepowered.api.event.Subscribe;
+import org.spongepowered.api.event.entity.player.PlayerJoinEvent;
+import org.spongepowered.api.event.entity.player.PlayerQuitEvent;
 import org.spongepowered.api.event.state.InitializationEvent;
 import org.spongepowered.api.event.state.ServerStartedEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -179,6 +182,19 @@ public class Ember {
     }
 
     /**
+     * Gets the Arena from the passed world.
+     * @param world The world a Arena is on.
+     * @return Arena in that world.
+     */
+    public static Optional<Arena> getArena(World world){
+        for(Arena a : Ember.arenas.keySet()){
+            if(a.getSpawn().getWorld().equals(world))
+                return Optional.of(a);
+        }
+        return Optional.absent();
+    }
+
+    /**
      * Get an arena by it's running minigame.
      *
      * @param minigame the currently running minigame.
@@ -199,6 +215,28 @@ public class Ember {
      */
     public static Optional<Minigame> getMinigame(Arena arena) {
         return (Ember.arenas.get(arena) != null) ? Optional.of((Minigame) Ember.arenas.get(arena).getRunnable()) : Optional.<Minigame>absent();
+    }
+
+    /**
+     * Gets the minigame that is being played on the provided world.
+     * @param world The world that a minigame is playing on.
+     * @return And Optional Minigame that contains the minigame on the passed world.
+     */
+    public static Optional<Minigame> getMinigame(World world){
+        //Loop through the active minigames.
+        for( Minigame minigame : getMinigames() ) {
+
+            //Get the arena the minigame is being played on.
+            Optional<Arena> arenaOptional = Ember.getArena(minigame);
+            //If the arena is present
+            if(arenaOptional.isPresent())
+                //then check if the arena is being played on the passed world.
+                if(arenaOptional.get().getSpawn().getWorld().equals(world))
+                    //If so then return the minigame.
+                    return Optional.of(minigame);
+
+        }
+        return Optional.absent();
     }
 
     /**
