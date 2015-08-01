@@ -37,7 +37,6 @@ import com.google.gson.*;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import org.jnbt.NBTInputStream;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.state.InitializationEvent;
@@ -59,8 +58,8 @@ public class Ember {
 
     // Singleton
     private static Ember instance;
-    private static Serializer serializer = new Serializer();
-    private static Backup backup = new Backup("backup/");
+    private static Serializer serializer;
+    private static Backup backup;
 
     // A map to store arenas and their games.
     private static HashMap<Arena, Task> arenas;
@@ -73,6 +72,8 @@ public class Ember {
         Ember.instance = this;
         Ember.serializer = new Serializer();
         Ember.arenas = new HashMap<Arena, Task>();
+        backup = new Backup("backup/");
+        serializer = new Serializer();
     }
 
     /**
@@ -716,10 +717,9 @@ public class Ember {
                 zipFile.close();
 
 
-                //Change the dimensionId to a valid one through nbt tags
-                //Get the level_sponge.dat
-                File spongeDatFile = new File(worldsDirectory + File.separator + worldName + File.separator + "level_sponge.dat");
-                NBTInputStream inputStream = new NBTInputStream(new FileInputStream(spongeDatFile));
+                // Change the dimensionId to a valid one through nbt tags
+                // Get the level_sponge.dat
+                //File spongeDatFile = new File(worldsDirectory + File.separator + worldName + File.separator + "level_sponge.dat");
 
 
             } catch (IOException e) {
