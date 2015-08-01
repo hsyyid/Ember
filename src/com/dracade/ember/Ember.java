@@ -37,6 +37,7 @@ import com.google.gson.*;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import org.jnbt.NBTInputStream;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Subscribe;
 import org.spongepowered.api.event.state.InitializationEvent;
@@ -648,14 +649,14 @@ public class Ember {
 
                     //If we dont wan't to overwrite the existing file, throw an exception.
                     throw new RuntimeException("Backup loading failed! Destination world already exists! Enable overwrite to overwrite");
-                }else{
+                } else {
 
                     //Otherwise remove the existing world.
                     File existingWorld = new File(worldsDirectory + File.separator + worldName);
 
                     // Make sure that the folder we're about to remove contains the two essential world files
                     // so that we can't remove the wrong folder.
-                    if( Arrays.asList(existingWorld.listFiles()).contains("level.dat") && Arrays.asList(existingWorld.listFiles()).contains("level_sponge.dat") ) {
+                    if (Arrays.asList(existingWorld.listFiles()).contains("level.dat") && Arrays.asList(existingWorld.listFiles()).contains("level_sponge.dat")) {
 
                         //Remove the world folder.
                         existingWorld.delete();
@@ -682,7 +683,7 @@ public class Ember {
                 int len=0;
 
                 //While there are more entries.
-                while (entries.hasMoreElements()){
+                while (entries.hasMoreElements()) {
 
                     //Get the next entry
                     ZipEntry ze = entries.nextElement();
@@ -715,7 +716,13 @@ public class Ember {
                 zipFile.close();
 
 
-            }catch( IOException e ) {
+                //Change the dimensionId to a valid one through nbt tags
+                //Get the level_sponge.dat
+                File spongeDatFile = new File(worldsDirectory + File.separator + worldName + File.separator + "level_sponge.dat");
+                NBTInputStream inputStream = new NBTInputStream(new FileInputStream(spongeDatFile));
+
+
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
