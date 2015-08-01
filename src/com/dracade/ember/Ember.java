@@ -45,9 +45,9 @@ import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.world.World;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 @Plugin(name = "Ember", id = "EMBER", version = "1.0.0")
@@ -551,8 +551,9 @@ public class Ember {
                 //Iterate through all the files and copy them
                 for (String f : filesToCopy) {
 
-                    //Create a new zipEntry and add it to the outputStream
-                    ZipEntry ze = new ZipEntry(f);
+                    // Create a new zipEntry and add it to the outputStream but remove the worldname beginning in the zip file
+                    // so we don't end up with a zip called "World.zip" that contains a directory called "World"
+                    ZipEntry ze = new ZipEntry(f.substring(sourceFile.getName().length()+1));
                     zipOutputStream.putNextEntry(ze);
 
                     //Open the file to be written to the zip
@@ -566,13 +567,13 @@ public class Ember {
 
                     }
 
-                    //Close this entry
+                    //Close the stream
+                    fileInputStream.close();
                     zipOutputStream.closeEntry();
 
                 }
 
-                //Write the zip file.
-                zipOutputStream.flush();
+                //Close the zip file.
                 zipOutputStream.close();
 
             }catch(IOException e){
@@ -589,7 +590,7 @@ public class Ember {
          *
          * @Param worldName The world's name to backup.
          */
-        public void BackupWorld( String worldName ) {
+        public void backupWorld(String worldName) {
 
             //Try to get the world to backup.
             Optional<World> worldOptional = Ember.game().getServer().getWorld(worldName);
@@ -607,6 +608,116 @@ public class Ember {
 //            }
 
             createCompressedBackup( worldName, "Worlds");
+
+        }
+
+        /**
+         * Loads a world from the backup folder and copies it in the worlds folder under the same name.
+         *
+         * @param backupName The backup worldname
+         */
+        public void loadWorld(String backupName) {
+            loadWorld(backupName, backupName, false);
+        }
+
+        /**
+         * Loads a world from the backup folder and copies it in the worlds folder under the same name.
+         *
+         * @param backupName The world name in the backups
+         * @param worldName The destination world name.
+         */
+        public void loadWorld(String backupName, String worldName) {
+            loadWorld(backupName, worldName, false);
+        }
+
+        /**
+         * Loads a world from the backup folder and copies it in the worlds folder.
+         *
+         * @param backupName The world name in the backups
+         * @param worldName The destination world name.
+         * @param overwrite Overwrite destination if it already exists?
+         */
+        public void loadWorld(String backupName, String worldName, boolean overwrite) {
+
+            //Check if there already is a world with the destination name.
+            Optional<World> worldOptional = Ember.game().getServer().getWorld(worldName);
+
+            if (worldOptional.isPresent()) {
+
+                if (!overwrite) {
+
+                    //If we dont wan't to overwrite the existing file, throw an exception.
+                    throw new RuntimeException("Backup loading failed! Destination world already exists! Enable overwrite to overwrite");
+                }else{
+
+                    //Otherwise remove the existing world.
+                    File existingWorld = new File(worldsDirectory + File.separator + worldName);
+
+                    // Make sure that the folder we're about to remove contains the two essential world files
+                    // so that we can't remove the wrong folder.
+                    if( Arrays.asList(existingWorld.listFiles()).contains("level.dat") && Arrays.asList(existingWorld.listFiles()).contains("level_sponge.dat") ) {
+
+                        //Remove the world folder.
+                        existingWorld.delete();
+                    }
+                }
+            }
+
+            File worldDir = new File(worldsDirectory + File.separator + worldName);
+
+            if (!worldDir.exists()) {
+                worldDir.mkdir();
+            }
+
+            try {
+
+                //Try to load the zipfile.
+                ZipFile zipFile = new ZipFile(backupDirectory + File.separator + "worlds" + File.separator + backupName + ".zip");
+
+                //Get all the entries in the zip file
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+                //Variables for reading and writing
+                byte[] buffer = new byte[1024];
+                int len=0;
+
+                //While there are more entries.
+                while (entries.hasMoreElements()){
+
+                    //Get the next entry
+                    ZipEntry ze = entries.nextElement();
+
+                    //Get the entry as a file.
+                    File entryFile = new File(worldsDirectory + File.separator + worldName + File.separator + ze.getName());
+
+                    if (ze.isDirectory()) {
+                        entryFile.mkdirs();
+                    } else {
+                        entryFile.getParentFile().mkdirs();
+                    }
+
+                    //Create the output stream for the new file and the input stream from the zipfile
+                    FileOutputStream fileOutputStream = new FileOutputStream(entryFile);
+                    InputStream entryInputStream = zipFile.getInputStream(ze);
+
+                    //While there is something to read then write it to the output file
+                    while ( (len=entryInputStream.read( buffer, 0, buffer.length )) > 0 ) {
+                        fileOutputStream.write(buffer , 0, buffer.length);
+                    }
+
+                    //Close all the streams.
+                    entryInputStream.close();
+                    fileOutputStream.close();
+
+                }
+
+                //Close the zip file.
+                zipFile.close();
+
+
+            }catch( IOException e ) {
+                e.printStackTrace();
+            }
 
         }
 
