@@ -74,34 +74,22 @@ public final class Backup {
     }
 
     /**
-     * Returns a full list of files prefixed by their directories relative to
-     * the starting directory.
+     * Creates a backup of the chosen world.
+     * Make sure the chosen world is unloaded!
      *
-     * @param source The starting directory
-     * @return A list of files prefixed with their relative directories
+     * @Param worldName The world's name to backup.
      */
-    private String[] generateFileList(File source) {
-        // Create a list to store the entries temporarily
-        List<String> files = new ArrayList<String>();
+    public void backupWorld(String worldName) {
+        // Try to get the world to backup
+        Optional<World> worldOptional = Ember.game().getServer().getWorld(worldName);
 
-        // Iterate through the current directory to add files.
-        for (File file : source.listFiles()) {
-            // If the file is a directory then call this function again
-            if (file.isDirectory()) {
-                // Loop through the received files and add them
-                Collections.addAll(files, generateFileList(file));
-            }else {
-                // Get the world's path
-                String path = file.getPath();
-
-                // Remove the worlds directory from the pathname,
-                // so that the zip entry does not prefix everything with the world directory.
-                files.add(path.substring(worldsDirectory.length() + 1, path.length()));
-            }
+        // If the world does not exist throw an exception
+        if (!worldOptional.isPresent()) {
+            throw new RuntimeException(String.format("Cannot backup %s because the world does not exist!", worldName));
         }
 
-        // return an array.
-        return files.toArray(new String[files.size()]);
+        // Archive the world.
+        this.createCompressedBackup(worldName, "Worlds");
     }
 
     /**
@@ -175,22 +163,34 @@ public final class Backup {
     }
 
     /**
-     * Creates a backup of the chosen world.
-     * Make sure the chosen world is unloaded!
+     * Returns a full list of files prefixed by their directories relative to
+     * the starting directory.
      *
-     * @Param worldName The world's name to backup.
+     * @param source The starting directory
+     * @return A list of files prefixed with their relative directories
      */
-    public void backupWorld(String worldName) {
-        // Try to get the world to backup
-        Optional<World> worldOptional = Ember.game().getServer().getWorld(worldName);
+    private String[] generateFileList(File source) {
+        // Create a list to store the entries temporarily
+        List<String> files = new ArrayList<String>();
 
-        // If the world does not exist throw an exception
-        if (!worldOptional.isPresent()) {
-            throw new RuntimeException(String.format("Cannot backup %s because the world does not exist!", worldName));
+        // Iterate through the current directory to add files.
+        for (File file : source.listFiles()) {
+            // If the file is a directory then call this function again
+            if (file.isDirectory()) {
+                // Loop through the received files and add them
+                Collections.addAll(files, generateFileList(file));
+            }else {
+                // Get the world's path
+                String path = file.getPath();
+
+                // Remove the worlds directory from the pathname,
+                // so that the zip entry does not prefix everything with the world directory.
+                files.add(path.substring(worldsDirectory.length() + 1, path.length()));
+            }
         }
 
-        // Archive the world.
-        this.createCompressedBackup(worldName, "Worlds");
+        // return an array.
+        return files.toArray(new String[files.size()]);
     }
 
     /**
