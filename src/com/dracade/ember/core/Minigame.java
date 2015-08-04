@@ -23,6 +23,11 @@
  */
 package com.dracade.ember.core;
 
+import org.spongepowered.api.entity.player.Player;
+import org.spongepowered.api.event.Subscribe;
+
+import java.util.Collection;
+
 public interface Minigame extends Runnable {
 
     /**
@@ -51,5 +56,11 @@ public interface Minigame extends Runnable {
      * @return True if you wish to register events.
      */
     boolean events();
+
+    /**
+     * Gets the players on the minigame.
+     * @return A collection of players in the minigame.
+     */
+    Collection<Player> players();
 
 }
