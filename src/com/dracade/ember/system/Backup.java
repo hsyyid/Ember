@@ -1,5 +1,6 @@
 package com.dracade.ember.system;
 
+import com.dracade.ember.Ember;
 import com.dracade.ember.exceptions.IllegalBackupDestination;
 import com.google.common.base.Optional;
 import ninja.leaping.configurate.ConfigurationNode;
