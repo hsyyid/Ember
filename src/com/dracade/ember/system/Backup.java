@@ -61,14 +61,18 @@ public final class Backup {
             // A world is named after it's directory, so it's safe to assume
             // that there must be a directory with the same name as the world.
 
-            // Build a loader and create a ConfiguratioNode from that, then get the 'level-name' from the server.properties
+
+            // TODO: This is temporary and will change, as it stands, "server.properties" isn't being parsed correctly.
+            // TODO: it must have a value for each field in order to be loaded correctly.
+
+            // Build a loader and create a ConfigurationNode from that, then get the 'level-name' from the server.properties
             HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setFile(new File("server.properties")).build();
             ConfigurationNode node = loader.load();
 
             // Create the serverDir File from that.
             worldsDirectory = (String) node.getNode("level-name").getValue();
 
-        } catch ( IOException e ) {
+        } catch (IOException e) {
             // Throw a runtime exception if we can't load the server.properties file.
             throw new RuntimeException("Unable to load server.properties!\n" + e.getMessage());
         }

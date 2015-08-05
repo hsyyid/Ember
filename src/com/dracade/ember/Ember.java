@@ -56,7 +56,7 @@ import java.util.zip.ZipOutputStream;
 public class Ember {
 
     // Injects;
-    @Inject Game game;
+    private Game game;
 
     // Singletons
     private static Ember instance;
@@ -67,11 +67,19 @@ public class Ember {
     private static HashMap<Arena, Task> arenas;
 
     /**
+     * Ember constructor.
+     */
+    @Inject
+    private Ember(Game game) {
+        Ember.instance = this;
+        this.game = game;
+    }
+
+    /**
      * This method is called on server initialization.
      */
     @Subscribe
     private void onInitialization(InitializationEvent event) {
-        Ember.instance = this;
         Ember.serializer = Serializer.instance();
         Ember.backup = Backup.instance("backup");
 
@@ -101,7 +109,9 @@ public class Ember {
      *
      * @return Ember's backup manager.
      */
-    public static Backup backup() { return Ember.backup; }
+    public static Backup backup() {
+        return Ember.backup;
+    }
 
     /**
      * Set the minigame to be played on an arena.
