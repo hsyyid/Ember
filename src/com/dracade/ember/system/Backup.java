@@ -8,6 +8,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.world.World;
 
 import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -79,17 +80,17 @@ public final class Backup {
      *
      * @Param worldName The world's name to backup.
      */
-    public void backupWorld(String worldName) {
+    public void world(String worldName) {
         // Try to get the world to backup
         Optional<World> worldOptional = Ember.game().getServer().getWorld(worldName);
 
         // If the world does not exist throw an exception
         if (!worldOptional.isPresent()) {
-            throw new RuntimeException(String.format("Cannot backup %s because the world does not exist!", worldName));
+            throw new RuntimeException(String.format("Unable to backup %s because the world does not exist!", worldName));
         }
 
         // Archive the world.
-        this.createCompressedBackup(worldName, "Worlds");
+        this.compressWorld(worldName, "worlds");
     }
 
     /**
@@ -99,7 +100,7 @@ public final class Backup {
      * @param source The directory to create a backup from
      * @param destinationFolder The directory to write it to
      */
-    private void createCompressedBackup(String source, String destinationFolder) {
+    private void compressWorld(String source, String destinationFolder) {
         // Prefix the world with the world directory.
         File sourceFile = new File( worldsDirectory + File.separator + source );
 
@@ -197,9 +198,10 @@ public final class Backup {
      * Loads a world from the backup folder and copies it in the worlds folder under the same name.
      *
      * @param backupName The backup worldname
+     * @throws WriteAbortedException If the world already exists
      */
-    public void loadWorld(String backupName) {
-        this.loadWorld(backupName, backupName, false);
+    public void load(String backupName) throws WriteAbortedException {
+        this.load(backupName, backupName, false);
     }
 
     /**
@@ -207,24 +209,26 @@ public final class Backup {
      *
      * @param backupName The world name in the backups
      * @param worldName The destination world name
+     * @throws WriteAbortedException If the world already exists.
      */
-    public void loadWorld(String backupName, String worldName) {
-        this.loadWorld(backupName, worldName, false);
+    public void load(String backupName, String worldName) throws WriteAbortedException {
+        this.load(backupName, worldName, false);
     }
 
     /**
-     * Loads a world from the backup folder and copies it in the worlds folder.
+     * Loads a world from the backup folder and copies it to the worlds backup folder.
      *
      * @param backupName The backup world name
      * @param worldName The destination world name
      * @param overwrite Overwrite destination if it already exists?
+     * @throws WriteAbortedException If the world already exists and overwrite isn't enabled.
      */
-    public void loadWorld(String backupName, String worldName, boolean overwrite) {
+    public void load(String backupName, String worldName, boolean overwrite) throws WriteAbortedException {
         // If the world already exists...
         if (Ember.game().getServer().getWorld(worldName).isPresent()) {
-            // If we dont wan't to overwrite the existing file, throw an exception.
+            // If we dont want to overwrite the existing file, throw an exception.
             if (!overwrite) {
-                throw new RuntimeException("Unable to load the file from backup. The world already exists.");
+                throw new WriteAbortedException("Unable to load the file from backup.", new FileAlreadyExistsException("The world already exists."));
             } else {
                 // Remove the existing world.
                 File existingWorld = new File(worldsDirectory + File.separator + worldName);
