@@ -3,8 +3,6 @@ package com.dracade.ember.system;
 import com.dracade.ember.Ember;
 import com.dracade.ember.exceptions.IllegalBackupDestination;
 import com.google.common.base.Optional;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.world.World;
 
 import java.io.*;
@@ -35,7 +33,7 @@ public final class Backup {
     private File backupDirectory;
 
     // Directory where the worlds are located
-    private String worldsDirectory;
+    private File worldsDirectory;
 
     /**
      * Constructs Ember's BackupManager
@@ -57,25 +55,8 @@ public final class Backup {
             throw new IllegalBackupDestination("The backup destination is either not a directory or it could not be created.");
         }
 
-        try {
-            // A world is named after it's directory, so it's safe to assume
-            // that there must be a directory with the same name as the world.
-
-
-            // TODO: This is temporary and will change, as it stands, "server.properties" isn't being parsed correctly.
-            // TODO: it must have a value for each field in order to be loaded correctly.
-
-            // Build a loader and create a ConfigurationNode from that, then get the 'level-name' from the server.properties
-            HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setFile(new File("server.properties")).build();
-            ConfigurationNode node = loader.load();
-
-            // Create the serverDir File from that.
-            worldsDirectory = (String) node.getNode("level-name").getValue();
-
-        } catch (IOException e) {
-            // Throw a runtime exception if we can't load the server.properties file.
-            throw new RuntimeException("Unable to load server.properties!\n" + e.getMessage());
-        }
+        // Create the serverDir File from that.
+        this.worldsDirectory = Ember.game().getSavesDirectory();
     }
 
     /**
@@ -106,7 +87,7 @@ public final class Backup {
      */
     private void compressWorld(String source, String destinationFolder) {
         // Prefix the world with the world directory.
-        File sourceFile = new File( worldsDirectory + File.separator + source );
+        File sourceFile = new File(worldsDirectory, source);
 
         // New destination directory: e.g. "backup/worlds/..."
         File destinationPath = new File(backupDirectory.getAbsolutePath().concat(File.separator + destinationFolder));
@@ -184,13 +165,13 @@ public final class Backup {
             if (file.isDirectory()) {
                 // Loop through the received files and add them
                 Collections.addAll(files, generateFileList(file));
-            }else {
+            } else {
                 // Get the world's path
                 String path = file.getPath();
 
                 // Remove the worlds directory from the pathname,
                 // so that the zip entry does not prefix everything with the world directory.
-                files.add(path.substring(worldsDirectory.length() + 1, path.length()));
+                files.add(path.substring(this.worldsDirectory.getName().length() + 1, path.length()));
             }
         }
 
@@ -235,7 +216,7 @@ public final class Backup {
                 throw new WriteAbortedException("Unable to load the file from backup.", new FileAlreadyExistsException("The world already exists."));
             } else {
                 // Remove the existing world.
-                File existingWorld = new File(worldsDirectory + File.separator + worldName);
+                File existingWorld = new File(worldsDirectory, worldName);
 
                 // Make sure that the folder we're about to remove contains the two essential world files
                 // so that we don't accidentally remove the wrong folder.
@@ -245,7 +226,7 @@ public final class Backup {
             }
         }
 
-        File worldDir = new File(worldsDirectory + File.separator + worldName);
+        File worldDir = new File(worldsDirectory, worldName);
 
         if (!worldDir.exists()) {
             worldDir.mkdir();
@@ -267,7 +248,7 @@ public final class Backup {
                 ZipEntry ze = entries.nextElement();
 
                 // Get the entry as a file.
-                File entryFile = new File(worldsDirectory + File.separator + worldName + File.separator + ze.getName());
+                File entryFile = new File(worldDir, ze.getName());
 
                 if (ze.isDirectory()) {
                     entryFile.mkdirs();

@@ -40,8 +40,8 @@ import com.google.inject.Inject;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.event.Subscribe;
-import org.spongepowered.api.event.state.InitializationEvent;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.world.World;
@@ -78,8 +78,8 @@ public class Ember {
     /**
      * This method is called on server initialization.
      */
-    @Subscribe
-    private void onInitialization(InitializationEvent event) {
+    @Listener
+    private void onInitialization(GameInitializationEvent event) {
         Ember.serializer = Serializer.instance();
         Ember.backup = Backup.instance("backup");
 
@@ -133,14 +133,14 @@ public class Ember {
         if (minigame != null) {
             // We then register our new minigame to the EventHandler.
             if (minigame.events()) {
-                Ember.instance.game.getEventManager().register(Ember.instance, minigame);
+                Ember.instance.game.getEventManager().registerListeners(Ember.instance, minigame);
             }
 
             // Call an event so that the plugins know a minigame has started.
             Ember.instance.game.getEventManager().post(new MinigameStartedEvent(minigame));
 
             // We then create a new Task.
-            Task task = Ember.instance.game.getScheduler().getTaskBuilder()
+            Task task = Ember.instance.game.getScheduler().createTaskBuilder()
                     .name(arena.getName())
                     .delay(minigame.delay())
                     .interval(minigame.interval())
@@ -182,7 +182,7 @@ public class Ember {
             Ember.instance.game.getEventManager().post(new MinigameStoppedEvent((Minigame) task.getRunnable()));
 
             // Unregister the object from the EventManager.
-            Ember.instance.game.getEventManager().unregister(task.getRunnable());
+            Ember.instance.game.getEventManager().unregisterListeners(task.getRunnable());
 
             // Remove the arena
             Ember.arenas.remove(arena);

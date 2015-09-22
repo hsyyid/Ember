@@ -24,8 +24,7 @@
 package com.dracade.ember.core.events;
 
 import com.dracade.ember.core.Minigame;
-import org.spongepowered.api.event.AbstractEvent;
-import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.impl.AbstractEvent;
 
 public abstract class MinigameEvent extends AbstractEvent {
 

@@ -23,8 +23,7 @@
  */
 package com.dracade.ember.core;
 
-import org.spongepowered.api.entity.player.Player;
-import org.spongepowered.api.event.Subscribe;
+import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.Collection;
 
