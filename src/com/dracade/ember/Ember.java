@@ -184,7 +184,7 @@ public class Ember {
             // Unregister the object from the EventManager.
             Ember.instance.game.getEventManager().unregisterListeners(task.getRunnable());
 
-            // Remove the arena
+            // Remove the arena.
             Ember.arenas.remove(arena);
 
             return true;
@@ -244,16 +244,15 @@ public class Ember {
      * @return Arena in that world.
      */
     public static ImmutableList<Arena> getArenas(World world){
-
-        //A collection to store the arena temporarily.
+        // A collection to store the arena temporarily.
         Collection<Arena> arenas = new ArrayList<Arena>();
 
-        //Loop through all the arenas.
+        // Loop through all the arenas.
         for (Arena a : Ember.arenas.keySet()) {
 
-            //If the arena's world equals the passed world.
+            //If the arena's world is equal to the specified world.
             if (a.getSpawn().getWorld().equals(world)) {
-                //add it to the collection.
+                // Add it to the collection.
                 arenas.add(a);
             }
         }
@@ -280,20 +279,19 @@ public class Ember {
      * @return An ImmutableList containing the minigames for that world.
      */
     public static ImmutableList<Minigame> getMinigames(World world){
-        //A collection to store the minigames temporarily.
+        // A collection to store the minigames temporarily.
         Collection<Minigame> minigames = new ArrayList<Minigame>();
 
-        //Loop through the active minigames.
+        // Loop through the active minigames.
         for (Arena a : Ember.getArenas(world)) {
-            //Get the minigame for the arena
+            // Get the minigame for the arena.
             Optional<Minigame> minigame = Ember.getMinigame(a);
 
-            //If the minigame is present
+            // If the minigame exists
             if(minigame.isPresent()) {
-                //If so then return the minigame.
+                // Then return the minigame.
                 minigames.add(minigame.get());
             }
-
         }
         return ImmutableList.copyOf(minigames);
     }
