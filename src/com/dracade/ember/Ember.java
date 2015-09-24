@@ -287,7 +287,7 @@ public class Ember {
             // Get the minigame for the arena.
             Optional<Minigame> minigame = Ember.getMinigame(a);
 
-            // If the minigame exists
+            // If the minigame exists...
             if(minigame.isPresent()) {
                 // Then return the minigame.
                 minigames.add(minigame.get());
