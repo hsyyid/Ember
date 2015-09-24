@@ -23,11 +23,8 @@
  */
 package com.dracade.ember;
 
-import com.dracade.ember.exceptions.IllegalBackupDestination;
 import com.dracade.ember.core.Arena;
 import com.dracade.ember.core.Minigame;
-import com.dracade.ember.core.adapters.ClassAdapter;
-import com.dracade.ember.core.adapters.WorldAdapter;
 import com.dracade.ember.core.events.minigame.MinigameStartedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppingEvent;
@@ -35,10 +32,7 @@ import com.dracade.ember.system.Backup;
 import com.dracade.ember.system.Serializer;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.*;
 import com.google.inject.Inject;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -46,11 +40,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.service.scheduler.Task;
 import org.spongepowered.api.world.World;
 
-import java.io.*;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 @Plugin(name = "Ember", id = "EMBER", version = "1.0.0")
 public class Ember {
@@ -151,7 +141,7 @@ public class Ember {
             Ember.arenas.put(arena, task);
         }
 
-        // We return true to acknowlegde the task has been registered successfully.
+        // We return true to acknowledge the task has been registered successfully.
         return true;
     }
 
