@@ -108,7 +108,7 @@ public final class Serializer {
      * @return the relevant class.
      * @throws ClassNotFoundException if the class wasn't found.
      */
-    public Class getType(String json) throws ClassNotFoundException {
+    public Class<?> getType(String json) throws ClassNotFoundException {
         JsonParser parser = new JsonParser();
         JsonElement element = parser.parse(json);
         if (element.isJsonObject()) {
