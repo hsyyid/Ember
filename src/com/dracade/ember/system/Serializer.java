@@ -9,6 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * TODO:
+ *
+ *  This class should be refactored.
+ *  There is no need for the register functions which makes me
+ *  wonder what this class is even doing...
+ *
+ */
+
+/**
  * A class to handle object serialization.
  */
 public final class Serializer {
