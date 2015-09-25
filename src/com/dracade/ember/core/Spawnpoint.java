@@ -27,21 +27,21 @@ import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-public class Spawnpoint {
+public class SpawnPoint {
 
-    // Spawnpoint properties
+    // SpawnPoint properties
     private Vector3d position;
     private Vector3d rotation;
     private World world;
 
     /**
-     * Creates a spawnpoint at the given position and world where a player can spawn it with the given rotation.
+     * Creates a SpawnPoint at the given position and world where a player can spawn it with the given rotation.
      *
      * @param position The position the player spawns at.
      * @param rotation The rotation the player spawns in.
      * @param world The world the players spawns in.
      */
-    public Spawnpoint(Vector3d position, Vector3d rotation, World world){
+    public SpawnPoint(Vector3d position, Vector3d rotation, World world){
         this.position = position;
         this.rotation = rotation;
         this.world = world;
