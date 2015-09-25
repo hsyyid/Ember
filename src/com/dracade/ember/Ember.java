@@ -71,7 +71,7 @@ public class Ember {
     @Listener
     private void onInitialization(GameInitializationEvent event) {
         Ember.serializer = Serializer.instance();
-        Ember.backup = Backup.instance("backup");
+        Ember.backup = Backup.instance("backups");
 
         Ember.arenas = new HashMap<Arena, Task>();
     }
