@@ -123,14 +123,14 @@ public class Ember {
         if (minigame != null) {
             // We then register our new minigame to the EventHandler.
             if (minigame.events()) {
-                Ember.instance.game.getEventManager().registerListeners(Ember.instance, minigame);
+                Ember.game().getEventManager().registerListeners(Ember.instance, minigame);
             }
 
             // Call an event so that the plugins know a minigame has started.
-            Ember.instance.game.getEventManager().post(new MinigameStartedEvent(minigame));
+            Ember.game().getEventManager().post(new MinigameStartedEvent(minigame));
 
             // We then create a new Task.
-            Task task = Ember.instance.game.getScheduler().createTaskBuilder()
+            Task task = Ember.game().getScheduler().createTaskBuilder()
                     .name(arena.getName())
                     .delay(minigame.delay())
                     .interval(minigame.interval())
@@ -159,7 +159,7 @@ public class Ember {
         // If the task exists...
         if (task != null) {
             // Call an event so that the plugins know a minigame is being stopped.
-            boolean cancelled = Ember.instance.game.getEventManager().post(new MinigameStoppingEvent((Minigame) task.getRunnable()));
+            boolean cancelled = Ember.game().getEventManager().post(new MinigameStoppingEvent((Minigame) task.getRunnable()));
 
             if (cancelled)
                 throw new Exception("Unable to override the currently running minigame.");
@@ -169,10 +169,10 @@ public class Ember {
             task.cancel();
 
             // Call an event so that the plugins know a minigame has stopped.
-            Ember.instance.game.getEventManager().post(new MinigameStoppedEvent((Minigame) task.getRunnable()));
+            Ember.game().getEventManager().post(new MinigameStoppedEvent((Minigame) task.getRunnable()));
 
             // Unregister the object from the EventManager.
-            Ember.instance.game.getEventManager().unregisterListeners(task.getRunnable());
+            Ember.game().getEventManager().unregisterListeners(task.getRunnable());
 
             // Remove the arena.
             Ember.arenas.remove(arena);
