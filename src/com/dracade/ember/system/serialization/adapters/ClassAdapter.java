@@ -21,23 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dracade.ember.core.adapters;
+package com.dracade.ember.system.serialization.adapters;
 
-import com.dracade.ember.Ember;
-import com.google.common.base.Optional;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import org.spongepowered.api.world.World;
 
 import java.io.IOException;
-import java.util.UUID;
 
-public class WorldAdapter extends TypeAdapter<World> {
+public class ClassAdapter extends TypeAdapter<Class> {
 
     @Override
-    public void write(JsonWriter out, World value) throws IOException {
+    public void write(JsonWriter out, Class value) throws IOException {
         if (value == null) {
             out.nullValue();
             return;
@@ -45,30 +41,33 @@ public class WorldAdapter extends TypeAdapter<World> {
 
         out.beginObject();
             out.name("name");
+            out.value(value.getSimpleName());
+
+            out.name("class");
             out.value(value.getName());
-
-            out.name("uniqueId");
-            out.value(value.getUniqueId().toString());
         out.endObject();
-
     }
 
     @Override
-    public World read(JsonReader in) throws IOException {
+    public Class read(JsonReader in) throws IOException {
         if (in.peek() == JsonToken.NULL) {
             return null;
         }
-
         in.beginObject();
             in.nextName();
             in.nextString();
             in.nextName();
 
-        Optional<World> optional = Ember.game().getServer().getWorld(UUID.fromString(in.nextString()));
+        Class c = null;
+        try {
+            c = Class.forName(in.nextString());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
         in.endObject();
 
-        return optional.isPresent()? optional.get() : null;
+        return c;
     }
 
 }

@@ -28,8 +28,8 @@ import com.dracade.ember.core.Minigame;
 import com.dracade.ember.core.events.minigame.MinigameStartedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppedEvent;
 import com.dracade.ember.core.events.minigame.MinigameStoppingEvent;
-import com.dracade.ember.system.Backup;
-import com.dracade.ember.system.Serializer;
+import com.dracade.ember.system.backup.Backup;
+import com.dracade.ember.system.serialization.Serializer;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -71,7 +71,7 @@ public class Ember {
     @Listener
     private void onInitialization(GameInitializationEvent event) {
         Ember.serializer = Serializer.instance();
-        Ember.backup = Backup.instance("backups");
+        Ember.backup = Backup.instance("backup");
 
         Ember.arenas = new HashMap<Arena, Task>();
     }
