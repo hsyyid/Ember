@@ -25,7 +25,9 @@ package com.dracade.ember.core.events.minigame;
 
 import com.dracade.ember.core.Minigame;
 import com.dracade.ember.core.events.MinigameEvent;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.cause.Cause;
 
 public class MinigameStoppingEvent extends MinigameEvent implements Cancellable {
 
@@ -51,4 +53,9 @@ public class MinigameStoppingEvent extends MinigameEvent implements Cancellable 
         this.cancelled = cancel;
     }
 
+    @Override
+	public Cause getCause()
+	{
+		return Cause.of(Sponge.getPluginManager().getPlugin("EMBER").get());	
+	}
 }

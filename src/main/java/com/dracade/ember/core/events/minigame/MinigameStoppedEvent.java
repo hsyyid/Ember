@@ -25,6 +25,8 @@ package com.dracade.ember.core.events.minigame;
 
 import com.dracade.ember.core.Minigame;
 import com.dracade.ember.core.events.MinigameEvent;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.Cause;
 
 public class MinigameStoppedEvent extends MinigameEvent {
 
@@ -37,4 +39,8 @@ public class MinigameStoppedEvent extends MinigameEvent {
         super(minigame);
     }
 
+    @Override
+    public Cause getCause() {
+        return Cause.of(Sponge.getPluginManager().getPlugin("EMBER").get());
+    }
 }
