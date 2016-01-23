@@ -1,6 +1,7 @@
 package com.dracade.ember.system;
 
 import com.dracade.ember.core.adapters.ClassAdapter;
+import com.dracade.ember.core.adapters.LocationAdapter;
 import com.dracade.ember.core.adapters.WorldAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.TypeAdapter;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.HashMap;
@@ -49,6 +51,7 @@ public final class Serializer {
 
         this.register(Class.class, ClassAdapter.class);
         this.register(World.class, WorldAdapter.class);
+        this.register(Location.class, LocationAdapter.class);
     }
 
     /**
